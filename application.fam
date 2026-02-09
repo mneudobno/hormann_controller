@@ -1,0 +1,11 @@
+App(
+    appid="hormann_bisecur",
+    name="Hormann BiSecur",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="hormann_bisecur_app",
+    requires=["gui", "storage"],
+    stack_size=4 * 1024,
+    fap_category="Sub-GHz",
+    fap_icon="images/hormann_10px.png",
+    fap_icon_assets="images",
+)
