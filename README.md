@@ -1,18 +1,17 @@
 # Hormann BiSecur Controller for Flipper Zero
 
-Control Hormann garage doors equipped with BiSecur receivers directly from your Flipper Zero. Compatible with HSE4-868-BS remotes. Supports up to 8 doors with individual Open/Close/Stop/Light controls, AES-128 encrypted frames, and persistent rolling counters.
+Control a Hormann garage door equipped with a BiSecur receiver directly from your Flipper Zero. Compatible with HSE4-868-BS remotes. Single-door app with Open/Close/Stop/Light controls, AES-128 encrypted frames, and a persistent rolling counter.
 
 > **Note**: Protocol constants (sync word, command codes, payload format) are best-guess placeholders based on the SX1209 packet engine. They need to be refined using captured signals from an actual HSE4-868-BS remote — see [Analyzing Saved Signals](#analyzing-saved-signals) below.
 
 ## Features
 
-- Individual control of multiple Hormann garage doors
 - Open / Close / Stop commands via hardware buttons
 - Light toggle via long-press OK
-- AES-128 encrypted frames with per-door keys
-- Delete doors via long-press in menu
-- Rolling counters persisted on SD card across reboots
+- AES-128 encrypted frames
+- Rolling counter persisted on SD card across reboots
 - Pairing-based — registers as a new remote alongside your existing one
+- Launches straight to control screen (no menus)
 
 ## Installation
 
@@ -30,28 +29,17 @@ uv run ufbt launch   # Deploy and launch on Flipper
 
 The app appears under **Sub-GHz > Hormann BiSecur** on the Flipper.
 
-## Pairing a Door
+## Pairing
 
 The Flipper registers as a new remote. Your existing HSE4-868-BS remote continues to work.
 
-1. In the app, select **Add Door** and enter a name
+1. Launch the app — on first run it prompts for a door name
 2. The app generates a random serial number and AES key
 3. On the **Hormann receiver unit**, press and hold the **P button** (learn/program button) until the LED indicates learn mode
-4. In the app, select the new door and press any command button (e.g. **OK** for Stop) to transmit
+4. On the Flipper, press any command button (e.g. **OK** for Stop) to transmit
 5. The receiver learns the new remote — pairing is complete
 
-Repeat for each door/receiver.
-
 ## Controls
-
-### Menu
-
-| Action | Result |
-|--------|--------|
-| Short press OK | Select door / open control screen |
-| Long press OK | Delete door (with confirmation) |
-
-### Control Screen
 
 | Button | Action |
 |--------|--------|
@@ -59,7 +47,7 @@ Repeat for each door/receiver.
 | DOWN | Close door |
 | OK | Stop |
 | Long OK | Toggle light |
-| Back | Return to menu |
+| Back | Exit app |
 
 ## Analyzing Saved Signals
 
@@ -180,16 +168,14 @@ Configuration is stored at `/ext/apps_data/hormann_bisecur/config.txt` on the SD
 ## Project Structure
 
 ```
-├── application.fam                           # App manifest
-├── hormann_bisecur.c/h                       # Entry point, app lifecycle
-├── hormann_bisecur_protocol.c/h              # BiSecur frame encoding & radio TX
-├── hormann_bisecur_store.c/h                 # Door config persistence
+├── application.fam                       # App manifest
+├── hormann_bisecur.c/h                   # Entry point, app lifecycle
+├── hormann_bisecur_protocol.c/h          # BiSecur frame encoding & radio TX
+├── hormann_bisecur_store.c/h             # Door config persistence
 ├── images/
-│   └── hormann_10px.png                      # App icon
+│   └── hormann_10px.png                  # App icon
 └── scenes/
-    ├── hormann_bisecur_scene.h               # Scene declarations
-    ├── hormann_bisecur_scene_menu.c          # Door list menu
-    ├── hormann_bisecur_scene_control.c       # Control screen
-    ├── hormann_bisecur_scene_add.c           # Add new door
-    └── hormann_bisecur_scene_confirm_delete.c # Delete confirmation
+    ├── hormann_bisecur_scene.h           # Scene declarations
+    ├── hormann_bisecur_scene_control.c   # Control screen
+    └── hormann_bisecur_scene_add.c       # First-run door setup
 ```

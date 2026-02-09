@@ -3,24 +3,18 @@
 #include "scenes/hormann_bisecur_scene.h"
 
 const AppSceneOnEnterCallback hormann_bisecur_scene_on_enter_handlers[] = {
-    [HormannSceneMenu] = hormann_bisecur_scene_menu_on_enter,
     [HormannSceneControl] = hormann_bisecur_scene_control_on_enter,
     [HormannSceneAdd] = hormann_bisecur_scene_add_on_enter,
-    [HormannSceneConfirmDelete] = hormann_bisecur_scene_confirm_delete_on_enter,
 };
 
 const AppSceneOnEventCallback hormann_bisecur_scene_on_event_handlers[] = {
-    [HormannSceneMenu] = hormann_bisecur_scene_menu_on_event,
     [HormannSceneControl] = hormann_bisecur_scene_control_on_event,
     [HormannSceneAdd] = hormann_bisecur_scene_add_on_event,
-    [HormannSceneConfirmDelete] = hormann_bisecur_scene_confirm_delete_on_event,
 };
 
 const AppSceneOnExitCallback hormann_bisecur_scene_on_exit_handlers[] = {
-    [HormannSceneMenu] = hormann_bisecur_scene_menu_on_exit,
     [HormannSceneControl] = hormann_bisecur_scene_control_on_exit,
     [HormannSceneAdd] = hormann_bisecur_scene_add_on_exit,
-    [HormannSceneConfirmDelete] = hormann_bisecur_scene_confirm_delete_on_exit,
 };
 
 const SceneManagerHandlers hormann_bisecur_scene_handlers = {
@@ -56,10 +50,6 @@ static HormannApp* hormann_bisecur_app_alloc(void) {
 
     app->scene_manager = scene_manager_alloc(&hormann_bisecur_scene_handlers, app);
 
-    app->submenu = submenu_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher, HormannViewMenu, submenu_get_view(app->submenu));
-
     app->control_view = view_alloc();
     view_allocate_model(app->control_view, ViewModelTypeLockFree, sizeof(HormannApp*));
     HormannApp** model = view_get_model(app->control_view);
@@ -72,25 +62,17 @@ static HormannApp* hormann_bisecur_app_alloc(void) {
     view_dispatcher_add_view(
         app->view_dispatcher, HormannViewTextInput, text_input_get_view(app->text_input));
 
-    app->dialog_ex = dialog_ex_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher, HormannViewConfirmDelete, dialog_ex_get_view(app->dialog_ex));
-
     hormann_bisecur_store_load(app);
 
     return app;
 }
 
 static void hormann_bisecur_app_free(HormannApp* app) {
-    view_dispatcher_remove_view(app->view_dispatcher, HormannViewMenu);
     view_dispatcher_remove_view(app->view_dispatcher, HormannViewControl);
     view_dispatcher_remove_view(app->view_dispatcher, HormannViewTextInput);
-    view_dispatcher_remove_view(app->view_dispatcher, HormannViewConfirmDelete);
 
-    submenu_free(app->submenu);
     view_free(app->control_view);
     text_input_free(app->text_input);
-    dialog_ex_free(app->dialog_ex);
 
     scene_manager_free(app->scene_manager);
     view_dispatcher_free(app->view_dispatcher);
@@ -105,7 +87,11 @@ int32_t hormann_bisecur_app(void* p) {
 
     HormannApp* app = hormann_bisecur_app_alloc();
 
-    scene_manager_next_scene(app->scene_manager, HormannSceneMenu);
+    if(app->door_configured) {
+        scene_manager_next_scene(app->scene_manager, HormannSceneControl);
+    } else {
+        scene_manager_next_scene(app->scene_manager, HormannSceneAdd);
+    }
     view_dispatcher_run(app->view_dispatcher);
 
     hormann_bisecur_app_free(app);

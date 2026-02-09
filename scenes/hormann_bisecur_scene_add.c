@@ -27,17 +27,16 @@ bool hormann_bisecur_scene_add_on_event(void* context, SceneManagerEvent event) 
     HormannApp* app = context;
     if(event.type == SceneManagerEventTypeCustom &&
        event.event == HormannCustomEventTextInputDone) {
-        if(app->door_count < HORMANN_MAX_DOORS && strlen(app->text_buf) > 0) {
-            HormannDoor* door = &app->doors[app->door_count];
-            strncpy(door->name, app->text_buf, HORMANN_NAME_MAX - 1);
-            door->name[HORMANN_NAME_MAX - 1] = '\0';
-            door->serial = furi_hal_random_get();
-            furi_hal_random_fill_buf(door->aes_key, HORMANN_AES_KEY_SIZE);
-            door->counter = 1;
-            app->door_count++;
+        if(strlen(app->text_buf) > 0) {
+            strncpy(app->door.name, app->text_buf, HORMANN_NAME_MAX - 1);
+            app->door.name[HORMANN_NAME_MAX - 1] = '\0';
+            app->door.serial = furi_hal_random_get();
+            furi_hal_random_fill_buf(app->door.aes_key, HORMANN_AES_KEY_SIZE);
+            app->door.counter = 1;
+            app->door_configured = true;
             hormann_bisecur_store_save(app);
+            scene_manager_next_scene(app->scene_manager, HormannSceneControl);
         }
-        scene_manager_previous_scene(app->scene_manager);
         return true;
     }
     return false;

@@ -4,7 +4,7 @@
 #include <gui/canvas.h>
 
 static void hormann_bisecur_scene_control_send(HormannApp* app, HormannCmd cmd) {
-    HormannDoor* door = &app->doors[app->selected_door];
+    HormannDoor* door = &app->door;
     hormann_bisecur_send(door->serial, door->aes_key, door->counter, cmd);
     door->counter++;
     hormann_bisecur_store_save(app);
@@ -12,7 +12,7 @@ static void hormann_bisecur_scene_control_send(HormannApp* app, HormannCmd cmd) 
 
 static void hormann_bisecur_scene_control_draw(Canvas* canvas, void* model) {
     HormannApp* app = *(HormannApp**)model;
-    HormannDoor* door = &app->doors[app->selected_door];
+    HormannDoor* door = &app->door;
 
     canvas_clear(canvas);
     canvas_set_font(canvas, FontPrimary);
